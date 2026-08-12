@@ -2,97 +2,260 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Top 10 AI Research Keywords</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI vs CTAM Research Data Analysis Dashboard (2025)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f7f6; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-ai: #38bdf8;
+            --accent-ctam: #f43f5e;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 1.2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-card .number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .ai-text { color: var(--accent-ai); }
+        .ctam-text { color: var(--accent-ctam); }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-card h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .canvas-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>10 คำคีย์เวิร์ดวิจัย AI ที่ถูกใช้มากที่สุด (2025)</h2>
-        <canvas id="keywordsChart"></canvas>
+
+    <div class="header">
+        <h1>AI vs CTAM Bibliometric Dashboard</h1>
+        <p>การวิเคราะห์เปรียบเทียบข้อมูลงานวิจัยปี 2025 จากฐานข้อมูล Scopus (N = 600)</p>
     </div>
+
+    <!-- Quick Metrics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>AI Dataset Total Papers</h3>
+            <div class="number ai-text">300</div>
+        </div>
+        <div class="stat-card">
+            <h3>CTAM Dataset Total Papers</h3>
+            <div class="number ctam-text">300</div>
+        </div>
+        <div class="stat-card">
+            <h3>AI Open Access Rate</h3>
+            <div class="number ai-text">70.7%</div>
+        </div>
+        <div class="stat-card">
+            <h3>CTAM Open Access Rate</h3>
+            <div class="number ctam-text">42.7%</div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        
+        <!-- Visualization 1: Top Keywords -->
+        <div class="chart-card full-width">
+            <h2>Visualization 1: Top Keywords Frequency Analysis</h2>
+            <div class="canvas-container">
+                <canvas id="keywordsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Visualization 2: Access & Type Breakdown -->
+        <div class="chart-card">
+            <h2>Visualization 2: Access Model & Publication Type</h2>
+            <div class="canvas-container">
+                <canvas id="accessTypeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Visualization 3: Citation Impact Metrics -->
+        <div class="chart-card">
+            <h2>Visualization 3: Citation Impact & Activity Metrics</h2>
+            <div class="canvas-container">
+                <canvas id="citationChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
     <script>
-        const ctx = document.getElementById('keywordsChart').getContext('2d');
-        new Chart(ctx, {
+        // Chart Config Defaults
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = 'Segoe UI';
+
+        // 1. Top Keywords Chart
+        new Chart(document.getElementById('keywordsChart'), {
             type: 'bar',
             data: {
-                labels: ['Artificial Intelligence', 'Machine Learning', 'Deep Learning', 'Explainable AI', 'ChatGPT', 'Generative AI', 'Computer Vision', 'Reinforcement Learning', 'Educational Tech', 'LLMs'],
+                labels: [
+                    'Artificial Intelligence', 'Bifurcation & Chaos', 'Machine Learning', 
+                    'Generative AI / ChatGPT', 'Deep Learning', 'Explainable AI (XAI)', 
+                    'Computational Thinking', 'STEM / Math Education'
+                ],
                 datasets: [{
-                    label: 'จำนวนงานวิจัย (Papers)',
-                    data: [120, 49, 48, 16, 7, 7, 5, 4, 4, 4],
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
+                    label: 'AI Dataset',
+                    data: [120, 0, 21, 20, 18, 16, 0, 0],
+                    backgroundColor: '#38bdf8'
+                }, {
+                    label: 'CTAM Dataset',
+                    data: [0, 18, 3, 0, 4, 0, 7, 8],
+                    backgroundColor: '#f43f5e'
                 }]
             },
-            options: { indexAxis: 'y', responsive: true }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    x: { grid: { color: '#334155' } },
+                    y: { grid: { color: '#334155' }, beginAtZero: true }
+                }
+            }
         });
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <title>Top AI Publishing Sources</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f7f6; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h2>วารสารและงานประชุมที่ตีพิมพ์ผลงานสูงสุด</h2>
-        <canvas id="sourcesChart"></canvas>
-    </div>
-    <script>
-        const ctx = document.getElementById('sourcesChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
+
+        // 2. Access Model & Document Type Chart
+        new Chart(document.getElementById('accessTypeChart'), {
+            type: 'bar',
             data: {
-                labels: ['ShodhKosh Journal', 'IJACSA', 'Engineering Research Express', 'ICMHI 2025', 'J. Medical AI', 'Ocean Engineering', 'Others'],
+                labels: ['AI: Open Access', 'AI: Closed', 'CTAM: Open Access', 'CTAM: Closed'],
                 datasets: [{
-                    data: [29, 27, 20, 15, 14, 11, 184],
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF']
+                    label: 'Journal Article',
+                    data: [184, 77, 90, 121],
+                    backgroundColor: '#0284c7'
+                }, {
+                    label: 'Conference Paper',
+                    data: [28, 11, 38, 51],
+                    backgroundColor: '#fb7185'
                 }]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true, grid: { color: '#334155' } },
+                    y: { stacked: true, grid: { color: '#334155' }, beginAtZero: true }
+                }
+            }
         });
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <title>Open Access Status</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f7f6; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h2>สัดส่วนรูปแบบการเข้าถึงบทความ (Open Access Status)</h2>
-        <canvas id="oaChart"></canvas>
-    </div>
-    <script>
-        const ctx = document.getElementById('oaChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'pie',
+
+        // 3. Citation Metrics Chart
+        new Chart(document.getElementById('citationChart'), {
+            type: 'bar',
             data: {
-                labels: ['Gold Open Access', 'Non-Open Access', 'Gold + Green Open Access', 'Hybrid Gold', 'Bronze / Green Open Access'],
+                labels: ['Mean Citations', '% Papers Cited', 'Max Citations / 10'],
                 datasets: [{
-                    data: [92, 88, 87, 19, 14],
-                    backgroundColor: ['#2ecc71', '#e74c3c', '#3498db', '#f1c40f', '#9b59b6']
+                    label: 'AI Dataset',
+                    data: [1.05, 38.0, 2.3],
+                    backgroundColor: '#38bdf8'
+                }, {
+                    label: 'CTAM Dataset',
+                    data: [2.13, 57.3, 3.4],
+                    backgroundColor: '#f43f5e'
                 }]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (context.dataIndex === 2) {
+                                    return context.dataset.label + ': Max ' + (context.raw * 10) + ' citations';
+                                }
+                                return context.dataset.label + ': ' + context.raw + (context.dataIndex === 1 ? '%' : '');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { color: '#334155' } },
+                    y: { grid: { color: '#334155' }, beginAtZero: true }
+                }
+            }
         });
     </script>
 </body>
