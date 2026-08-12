@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scopus Data Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --secondary: #3b82f6;
+            --bg: #f1f5f9;
+            --text: #334155;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+        }
+        .instructions {
+            background-color: #e0f2fe;
+            border-left: 5px solid var(--secondary);
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .chart-container {
+            position: relative;
+            height: 500px;
+            width: 100%;
+        }
+        .footer {
+            margin-top: 40px;
+            padding: 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Scopus Publications Overview</h1>
+    </div>
+
+    <div class="container">
+        <div class="instructions">
+            <strong>คำแนะนำการใส่ข้อมูล:</strong><br>
+            เนื่องจากระบบไม่ได้รับไฟล์ CSV ที่คุณแนบมา (อาจเกิดข้อผิดพลาดในการอัปโหลด) ในไฟล์ HTML นี้จึงเตรียมช่องให้คุณนำข้อมูลมาใส่ได้ทันที โดยไปที่ส่วน <code>const scopusData</code> ในโค้ด แล้ววางข้อมูลของคุณแทนที่ได้เลย กราฟจะแสดงผลอัตโนมัติ
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="scopusChart"></canvas>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated for GitHub Pages • Scopus Data Visualization
+    </div>
+
+    <script>
+        // --- ส่วนที่ให้แก้ไขข้อมูล ---
+        // นำข้อมูลปีและจำนวนผลงานจาก CSV ของคุณมาใส่ตรงนี้
+        const scopusData = [
+            { year: '2019', documents: 15 },
+            { year: '2020', documents: 22 },
+            { year: '2021', documents: 35 },
+            { year: '2022', documents: 48 },
+            { year: '2023', documents: 55 },
+            { year: '2024', documents: 40 }
+        ];
+        // ------------------------
+
+        const labels = scopusData.map(data => data.year);
+        const dataValues = scopusData.map(data => data.documents);
+
+        const ctx = document.getElementById('scopusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'จำนวนผลงานตีพิมพ์ (Documents)',
+                    data: dataValues,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(30, 58, 138, 1)',
+                    borderWidth: 2,
+                    borderRadius: 5,
+                    hoverBackgroundColor: 'rgba(30, 58, 138, 0.9)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: { size: 14, family: 'Segoe UI' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleFont: { size: 14 },
+                        bodyFont: { size: 14 },
+                        padding: 10
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        title: {
+                            display: true,
+                            text: 'จำนวนเอกสาร',
+                            font: { size: 14, weight: 'bold' }
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        title: {
+                            display: true,
+                            text: 'ปีที่ตีพิมพ์ (Year)',
+                            font: { size: 14, weight: 'bold' }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
