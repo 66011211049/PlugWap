@@ -1,262 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI vs CTAM Research Data Analysis Dashboard (2025)</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-ai: #38bdf8;
-            --accent-ctam: #f43f5e;
-            --border-color: #334155;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 2rem;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .header h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: #ffffff;
-        }
-
-        .header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background-color: var(--card-bg);
-            padding: 1.2rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            text-align: center;
-        }
-
-        .stat-card h3 {
-            margin: 0;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .stat-card .number {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-top: 0.5rem;
-        }
-
-        .ai-text { color: var(--accent-ai); }
-        .ctam-text { color: var(--accent-ctam); }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .chart-card {
-            background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-        }
-
-        .chart-card.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .chart-card h2 {
-            font-size: 1.1rem;
-            margin-top: 0;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .canvas-container {
-            position: relative;
-            height: 320px;
-            width: 100%;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CTAM vs AI Research Landscape 2025</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+:root{--bg:#0b1020;--card:#121a2e;--text:#eef2ff;--muted:#a8b3cf;--line:#27324d;}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(135deg,#080d1a,#101a32);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.container{max-width:1250px;margin:auto;padding:38px 22px 60px}
+.hero{padding:20px 0 25px}
+h1{font-size:clamp(30px,5vw,52px);margin:0 0 10px;line-height:1.05}
+h2{margin:0 0 8px;font-size:22px}
+p{color:var(--muted);line-height:1.65}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:22px 0}
+.card{background:rgba(18,26,46,.9);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 35px rgba(0,0,0,.18)}
+.metric{font-size:32px;font-weight:750;margin-top:6px}
+.small{font-size:13px;color:var(--muted)}
+.chart{height:560px}
+.insights{display:grid;gap:10px}
+.insight{padding:13px 15px;border-left:3px solid #8fb7ff;background:rgba(255,255,255,.035);border-radius:8px;color:#dce5ff}
+footer{margin-top:30px;color:#8290ad;font-size:13px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.chart{height:520px}}
+</style>
 </head>
 <body>
+<div class="container">
+<section class="hero">
+<h1>CTAM × AI<br>Research Landscape</h1>
+<p>Interactive analysis จากข้อมูล Scopus จำนวน 600 records (CTAM 300 + AI 300), ปี 2025 โดยเน้น Author Keywords, citation และความสัมพันธ์ระหว่างหัวข้อ</p>
+</section>
 
-    <div class="header">
-        <h1>AI vs CTAM Bibliometric Dashboard</h1>
-        <p>การวิเคราะห์เปรียบเทียบข้อมูลงานวิจัยปี 2025 จากฐานข้อมูล Scopus (N = 600)</p>
-    </div>
+<div class="grid">
+<div class="card"><div class="small">CTAM — papers</div><div class="metric">300</div><div class="small">Articles 211 · Conference 89 · Avg. citations 2.13</div></div>
+<div class="card"><div class="small">AI — papers</div><div class="metric">300</div><div class="small">Articles 261 · Conference 39 · Avg. citations 1.05</div></div>
+</div>
 
-    <!-- Quick Metrics -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>AI Dataset Total Papers</h3>
-            <div class="number ai-text">300</div>
-        </div>
-        <div class="stat-card">
-            <h3>CTAM Dataset Total Papers</h3>
-            <div class="number ctam-text">300</div>
-        </div>
-        <div class="stat-card">
-            <h3>AI Open Access Rate</h3>
-            <div class="number ai-text">70.7%</div>
-        </div>
-        <div class="stat-card">
-            <h3>CTAM Open Access Rate</h3>
-            <div class="number ctam-text">42.7%</div>
-        </div>
-    </div>
+<div class="card">
+<h2>1. Keyword Landscape — คำสำคัญที่เด่นที่สุด</h2>
+<p>เปรียบเทียบความถี่ของ Author Keywords ระหว่าง CTAM และ AI โดยรวมคำที่เป็น synonym ชัดเจน เช่น artificial intelligence / AI และ explainable AI</p>
+<div id="chart1" class="chart"></div>
+</div>
 
-    <div class="dashboard-grid">
-        
-        <!-- Visualization 1: Top Keywords -->
-        <div class="chart-card full-width">
-            <h2>Visualization 1: Top Keywords Frequency Analysis</h2>
-            <div class="canvas-container">
-                <canvas id="keywordsChart"></canvas>
-            </div>
-        </div>
+<br>
 
-        <!-- Visualization 2: Access & Type Breakdown -->
-        <div class="chart-card">
-            <h2>Visualization 2: Access Model & Publication Type</h2>
-            <div class="canvas-container">
-                <canvas id="accessTypeChart"></canvas>
-            </div>
-        </div>
+<div class="card">
+<h2>2. Keyword Co-occurrence Network — หัวข้อที่เชื่อมโยงกัน</h2>
+<p>จุด = keyword, เส้น = keyword สองคำปรากฏในบทความเดียวกัน ยิ่งเชื่อมกันมากยิ่งสะท้อน cluster ของงานวิจัย</p>
+<div id="chart2" class="chart"></div>
+</div>
 
-        <!-- Visualization 3: Citation Impact Metrics -->
-        <div class="chart-card">
-            <h2>Visualization 3: Citation Impact & Activity Metrics</h2>
-            <div class="canvas-container">
-                <canvas id="citationChart"></canvas>
-            </div>
-        </div>
+<br>
 
-    </div>
+<div class="card">
+<h2>3. Research Impact Landscape — ความถี่ vs citation</h2>
+<p>X = จำนวนบทความที่ใช้ keyword, Y = citation เฉลี่ย, ขนาดจุด = จำนวนบทความ จุดที่อยู่สูงและขวาจึงเป็นหัวข้อที่ทั้งพบมากและมี citation สูง</p>
+<div id="chart3" class="chart"></div>
+</div>
 
-    <script>
-        // Chart Config Defaults
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.font.family = 'Segoe UI';
+<br>
 
-        // 1. Top Keywords Chart
-        new Chart(document.getElementById('keywordsChart'), {
-            type: 'bar',
-            data: {
-                labels: [
-                    'Artificial Intelligence', 'Bifurcation & Chaos', 'Machine Learning', 
-                    'Generative AI / ChatGPT', 'Deep Learning', 'Explainable AI (XAI)', 
-                    'Computational Thinking', 'STEM / Math Education'
-                ],
-                datasets: [{
-                    label: 'AI Dataset',
-                    data: [120, 0, 21, 20, 18, 16, 0, 0],
-                    backgroundColor: '#38bdf8'
-                }, {
-                    label: 'CTAM Dataset',
-                    data: [0, 18, 3, 0, 4, 0, 7, 8],
-                    backgroundColor: '#f43f5e'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top' }
-                },
-                scales: {
-                    x: { grid: { color: '#334155' } },
-                    y: { grid: { color: '#334155' }, beginAtZero: true }
-                }
-            }
-        });
+<div class="card">
+<h2>อ่านข้อมูลนี้ต่อได้อย่างไร?</h2>
+<div class="insights">
+<div class="insight">• CTAM มี 300 บทความ และคำสำคัญจากผู้เขียนที่ไม่ซ้ำกัน 1344 คำ; ค่า citation เฉลี่ย 2.13 ครั้งต่อบทความ</div><div class="insight">• AI มี 300 บทความ และคำสำคัญที่ normalize แล้วสะท้อนธีมหลักอย่าง Artificial Intelligence, Machine Learning และ Deep Learning; ค่า citation เฉลี่ย 1.05</div><div class="insight">• ข้อมูลทั้งสองชุดอยู่ในปี 2025 จึงเหมาะกับการวิเคราะห์ “โครงสร้างหัวข้อ/ความสัมพันธ์/ผลกระทบ” มากกว่าการทำ trend รายปี</div>
+<div class="insight">• Raw data ยังสามารถต่อยอดเป็น author collaboration network, institution/country mapping (ถ้าเพิ่ม affiliation), source/journal analysis, citation distribution, abstract topic modeling และ TF-IDF ได้</div>
+</div>
+</div>
 
-        // 2. Access Model & Document Type Chart
-        new Chart(document.getElementById('accessTypeChart'), {
-            type: 'bar',
-            data: {
-                labels: ['AI: Open Access', 'AI: Closed', 'CTAM: Open Access', 'CTAM: Closed'],
-                datasets: [{
-                    label: 'Journal Article',
-                    data: [184, 77, 90, 121],
-                    backgroundColor: '#0284c7'
-                }, {
-                    label: 'Conference Paper',
-                    data: [28, 11, 38, 51],
-                    backgroundColor: '#fb7185'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { stacked: true, grid: { color: '#334155' } },
-                    y: { stacked: true, grid: { color: '#334155' }, beginAtZero: true }
-                }
-            }
-        });
+<footer>Generated for GitHub Pages · Source: uploaded Scopus CSV files · Visualization: Plotly</footer>
+</div>
 
-        // 3. Citation Metrics Chart
-        new Chart(document.getElementById('citationChart'), {
-            type: 'bar',
-            data: {
-                labels: ['Mean Citations', '% Papers Cited', 'Max Citations / 10'],
-                datasets: [{
-                    label: 'AI Dataset',
-                    data: [1.05, 38.0, 2.3],
-                    backgroundColor: '#38bdf8'
-                }, {
-                    label: 'CTAM Dataset',
-                    data: [2.13, 57.3, 3.4],
-                    backgroundColor: '#f43f5e'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                if (context.dataIndex === 2) {
-                                    return context.dataset.label + ': Max ' + (context.raw * 10) + ' citations';
-                                }
-                                return context.dataset.label + ': ' + context.raw + (context.dataIndex === 1 ? '%' : '');
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: { grid: { color: '#334155' } },
-                    y: { grid: { color: '#334155' }, beginAtZero: true }
-                }
-            }
-        });
-    </script>
+<script>
+const bar = {"keywords": ["artificial intelligence", "machine learning", "deep learning", "explainable ai", "generative ai", "bifurcation", "computational thinking", "chatgpt", "reinforcement learning", "computer vision", "chaos", "bifurcation analysis", "optimization", "large language models", "education", "ai in education", "stem education", "neural networks"], "CTAM": [0, 3, 4, 1, 0, 8, 7, 0, 2, 1, 5, 5, 3, 1, 1, 1, 4, 2], "AI": [129, 21, 18, 16, 13, 0, 0, 7, 4, 5, 0, 0, 2, 4, 4, 3, 0, 2]};
+Plotly.newPlot('chart1', [
+  {x:bar.keywords, y:bar.CTAM, type:'bar', name:'CTAM'},
+  {x:bar.keywords, y:bar.AI, type:'bar', name:'AI'}
+], {
+  barmode:'group',
+  margin:{l:55,r:25,t:20,b:150},
+  paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+  font:{color:'#eef2ff'},
+  xaxis:{tickangle:-45, gridcolor:'#27324d'},
+  yaxis:{title:'Keyword frequency', gridcolor:'#27324d'},
+  legend:{orientation:'h',y:1.08}
+}, {responsive:true});
+
+const pos = {"artificial intelligence": [1.0, 0.0], "machine learning": [0.9685831611286311, 0.2039257074751809], "deep learning": [0.8763066800438636, 0.39503801276340655], "explainable ai": [0.7289686274214116, 0.5613286268615247], "generative ai": [0.5358267949789965, 0.6923488989116523], "bifurcation": [0.30901699437494745, 0.7798663433620259], "computational thinking": [0.0627905195293133, 0.8183819173111826], "chatgpt": [-0.18738131458572482, 0.8054755455975247], "reinforcement learning": [-0.4257792915650727, 0.7419581830221359], "computer vision": [-0.6374239897486897, 0.6318208590761472], "chaos": [-0.8090169943749473, 0.48198390687982806], "bifurcation analysis": [-0.9297764858882515, 0.30186213320143573], "optimization": [-0.9921147013144779, 0.10277325152272936], "large language models": [-0.9921147013144779, -0.10277325152272951], "education": [-0.9297764858882512, -0.3018621332014362], "ai in education": [-0.8090169943749472, -0.4819839068798281], "stem education": [-0.6374239897486895, -0.6318208590761473], "neural networks": [-0.42577929156507216, -0.7419581830221362], "stability analysis": [-0.18738131458572463, -0.8054755455975247], "vedic mathematics": [0.06279051952931372, -0.8183819173111826], "natural language processing": [0.30901699437494723, -0.779866343362026], "higher education": [0.5358267949789968, -0.6923488989116522], "random forest": [0.7289686274214119, -0.5613286268615244], "federated learning": [0.8763066800438636, -0.39503801276340655], "educational technology": [0.9685831611286312, -0.20392570747518066]};
+const ex = [1.0, 0.9685831611286311, null, 1.0, 0.8763066800438636, null, 0.30901699437494745, -0.8090169943749473, null, 1.0, -0.6374239897486897, null, 1.0, 0.5358267949789965, null, 1.0, 0.7289686274214116, null, 1.0, 0.5358267949789968, null, 1.0, 0.9685831611286312, null, 1.0, -0.18738131458572482, null, 1.0, -0.9297764858882512, null, 0.8763066800438636, -0.42577929156507216, null, 0.8763066800438636, 0.9685831611286311, null, -0.6374239897486897, 0.5358267949789965, null, 1.0, -0.4257792915650727, null, 1.0, 0.7289686274214119, null, 1.0, -0.9921147013144779, null], ey = [0.0, 0.2039257074751809, null, 0.0, 0.39503801276340655, null, 0.7798663433620259, 0.48198390687982806, null, 0.0, 0.6318208590761472, null, 0.0, 0.6923488989116523, null, 0.0, 0.5613286268615247, null, 0.0, -0.6923488989116522, null, 0.0, -0.20392570747518066, null, 0.0, 0.8054755455975247, null, 0.0, -0.3018621332014362, null, 0.39503801276340655, -0.7419581830221362, null, 0.39503801276340655, 0.2039257074751809, null, 0.6318208590761472, 0.6923488989116523, null, 0.0, 0.7419581830221359, null, 0.0, -0.5613286268615244, null, 0.0, -0.10277325152272951, null];
+const labels = ["artificial intelligence", "machine learning", "deep learning", "explainable ai", "generative ai", "bifurcation", "computational thinking", "chatgpt", "reinforcement learning", "computer vision", "chaos", "bifurcation analysis", "optimization", "large language models", "education", "ai in education", "stem education", "neural networks", "stability analysis", "vedic mathematics", "natural language processing", "higher education", "random forest", "federated learning", "educational technology"];
+const freq = [129, 24, 22, 17, 13, 8, 7, 7, 6, 6, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
+const ctam = [0, 3, 4, 1, 0, 8, 7, 0, 2, 1, 5, 5, 3, 1, 1, 1, 4, 2, 4, 4, 2, 0, 0, 0, 0];
+const ai = [129, 21, 18, 16, 13, 0, 0, 7, 4, 5, 0, 0, 2, 4, 4, 3, 0, 2, 0, 0, 2, 4, 4, 4, 4];
+
+Plotly.newPlot('chart2', [
+  {x:ex,y:ey,mode:'lines',line:{width:1.2},hoverinfo:'none',showlegend:false},
+  {x:labels.map(k=>pos[k][0]),y:labels.map(k=>pos[k][1]),mode:'markers+text',
+    text:labels,textposition:'top center',
+    marker:{size:freq.map(v=>8+v*2.2),line:{width:1}},
+    customdata:labels.map((k,i)=>[k,freq[i],ctam[i],ai[i]]),
+    hovertemplate:'<b>%{customdata[0]}</b><br>Total: %{customdata[1]}<br>CTAM: %{customdata[2]}<br>AI: %{customdata[3]}<extra></extra>',
+    showlegend:false}
+], {
+  margin:{l:10,r:10,t:10,b:10}, xaxis:{visible:false}, yaxis:{visible:false},
+  paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+  font:{color:'#eef2ff'}
+}, {responsive:true});
+
+const imp = [{"keyword": "artificial intelligence", "papers": 117, "avg_citations": 0.81, "total_citations": 95, "ctam": 0, "ai": 117}, {"keyword": "machine learning", "papers": 24, "avg_citations": 2.12, "total_citations": 51, "ctam": 3, "ai": 21}, {"keyword": "deep learning", "papers": 22, "avg_citations": 0.82, "total_citations": 18, "ctam": 4, "ai": 18}, {"keyword": "explainable ai", "papers": 17, "avg_citations": 1.65, "total_citations": 28, "ctam": 1, "ai": 16}, {"keyword": "generative ai", "papers": 13, "avg_citations": 3.38, "total_citations": 44, "ctam": 0, "ai": 13}, {"keyword": "bifurcation", "papers": 8, "avg_citations": 2.12, "total_citations": 17, "ctam": 8, "ai": 0}, {"keyword": "computational thinking", "papers": 7, "avg_citations": 0.43, "total_citations": 3, "ctam": 7, "ai": 0}, {"keyword": "reinforcement learning", "papers": 6, "avg_citations": 2.33, "total_citations": 14, "ctam": 2, "ai": 4}, {"keyword": "computer vision", "papers": 6, "avg_citations": 0.33, "total_citations": 2, "ctam": 1, "ai": 5}, {"keyword": "chaos", "papers": 5, "avg_citations": 2.8, "total_citations": 14, "ctam": 5, "ai": 0}, {"keyword": "optimization", "papers": 5, "avg_citations": 2.4, "total_citations": 12, "ctam": 3, "ai": 2}, {"keyword": "bifurcation analysis", "papers": 5, "avg_citations": 2.2, "total_citations": 11, "ctam": 5, "ai": 0}, {"keyword": "chatgpt", "papers": 5, "avg_citations": 0.6, "total_citations": 3, "ctam": 0, "ai": 5}, {"keyword": "large language models", "papers": 5, "avg_citations": 0.4, "total_citations": 2, "ctam": 1, "ai": 4}, {"keyword": "stability analysis", "papers": 4, "avg_citations": 5.5, "total_citations": 22, "ctam": 4, "ai": 0}, {"keyword": "educational technology", "papers": 4, "avg_citations": 2.5, "total_citations": 10, "ctam": 0, "ai": 4}, {"keyword": "vedic mathematics", "papers": 4, "avg_citations": 2.0, "total_citations": 8, "ctam": 4, "ai": 0}, {"keyword": "ai in education", "papers": 4, "avg_citations": 1.25, "total_citations": 5, "ctam": 1, "ai": 3}, {"keyword": "higher education", "papers": 4, "avg_citations": 1.25, "total_citations": 5, "ctam": 0, "ai": 4}, {"keyword": "education", "papers": 4, "avg_citations": 0.75, "total_citations": 3, "ctam": 1, "ai": 3}];
+Plotly.newPlot('chart3', [
+  {x:imp.map(d=>d.papers),y:imp.map(d=>d.avg_citations),mode:'markers+text',
+    text:imp.map(d=>d.keyword),textposition:'top center',
+    marker:{size:imp.map(d=>8+Math.sqrt(d.papers)*4)},
+    customdata:imp.map(d=>[d.keyword,d.papers,d.avg_citations,d.total_citations,d.ctam,d.ai]),
+    hovertemplate:'<b>%{customdata[0]}</b><br>Papers: %{customdata[1]}<br>Avg citations: %{customdata[2]}<br>Total citations: %{customdata[3]}<br>CTAM: %{customdata[4]} · AI: %{customdata[5]}<extra></extra>',
+    showlegend:false}
+], {
+  margin:{l:65,r:25,t:20,b:60},
+  paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+  font:{color:'#eef2ff'},
+  xaxis:{title:'Number of papers using keyword',gridcolor:'#27324d'},
+  yaxis:{title:'Average citations per paper',gridcolor:'#27324d'}
+}, {responsive:true});
+</script>
 </body>
 </html>
