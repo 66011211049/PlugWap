@@ -3,168 +3,409 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โปรไฟล์ของฉัน | My Portfolio</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Scopus Publications Visualization</title>
+    <!-- โหลด Chart.js สำหรับทำ Data Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- โหลด PapaParse สำหรับอ่านไฟล์ CSV ของ Scopus -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <!-- โหลด Font Awesome สำหรับไอคอน -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Kanit', sans-serif;
         }
 
         body {
-            background-color: #f8f9fa;
-            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-main);
             line-height: 1.6;
         }
 
-        /* Header / Hero Section */
-        header {
-            background: linear-gradient(135deg, #4f46e5, #06b6d4);
+        .navbar {
+            background-color: var(--primary-color);
             color: white;
-            text-align: center;
-            padding: 80px 20px;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        header img {
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            border: 4px solid white;
-            margin-bottom: 15px;
-            object-fit: cover;
+        .navbar h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
         }
 
-        header h1 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-        }
-
-        header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        /* Container */
         .container {
-            max-width: 800px;
-            margin: -40px auto 40px auto;
-            padding: 0 20px;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
         }
 
-        /* Card Section */
-        .card {
-            background: white;
-            padding: 30px;
+        .dashboard-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .dashboard-header h2 {
+            font-size: 2rem;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-header p {
+            color: var(--text-muted);
+        }
+
+        .upload-section {
+            background-color: var(--card-bg);
+            padding: 2rem;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
         }
 
-        .card h2 {
-            color: #4f46e5;
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 8px;
-            margin-bottom: 15px;
-            font-size: 1.4rem;
+        .upload-section:hover {
+            border-color: var(--primary-color);
+            background-color: #f8fafc;
         }
 
-        /* Skills Tags */
-        .skills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .tag {
-            background-color: #e0e7ff;
-            color: #3730a3;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        /* Links & Buttons */
-        .btn-links {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 15px;
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin-top: 1rem;
         }
 
         .btn {
-            display: block;
-            text-align: center;
-            padding: 12px;
-            background-color: #4f46e5;
+            border: none;
             color: white;
-            text-decoration: none;
+            background-color: var(--primary-color);
+            padding: 12px 24px;
             border-radius: 8px;
-            font-weight: 500;
-            transition: background 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
         .btn:hover {
-            background-color: #4338ca;
+            background-color: var(--secondary-color);
         }
 
-        /* Footer */
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .chart-container {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+            height: 60vh;
+            width: 100%;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-right: 1.5rem;
+        }
+
+        .stat-details h3 {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-details p {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
         footer {
             text-align: center;
-            padding: 20px;
-            color: #6b7280;
-            font-size: 0.9rem;
+            margin-top: 3rem;
+            padding: 2rem;
+            color: var(--text-muted);
+            border-top: 1px solid #e5e7eb;
+        }
+
+        #fileNameDisplay {
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--primary-color);
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Section -->
-    <header>
-        <!-- สามารถเปลี่ยน URL รูปภาพโปรไฟล์ของคุณได้ตรงนี้ -->
-        <img src="https://via.placeholder.com/150" alt="Profile Picture">
-        <h1>สวัสดีครับ/ค่ะ, ฉันชื่อ [ชื่อของคุณ]</h1>
-        <p>Web Developer / Designer / Student</p>
-    </header>
+    <nav class="navbar">
+        <h1><i class="fas fa-chart-line"></i> Scopus Analytics Dashboard</h1>
+        <div><i class="fab fa-github"></i> GitHub Pages Demo</div>
+    </nav>
 
     <div class="container">
-        <!-- About Section -->
-        <div class="card">
-            <h2>เกี่ยวกับฉัน</h2>
-            <p>ยินดีต้อนรับสู่เว็บไซต์ของฉัน! ฉันมีความสนใจเกี่ยวกับการพัฒนาเว็บไซต์ การออกแบบ UI/UX และเทคโนโลยีใหม่ๆ กำลังมองหาโอกาสในการเรียนรู้และร่วมงานในโปรเจกต์ที่น่าสนใจ</p>
+        <div class="dashboard-header">
+            <h2>จำนวนผลงานตีพิมพ์แบ่งตามปี (Publications per Year)</h2>
+            <p>อัปโหลดไฟล์ CSV ที่ส่งออกจาก Scopus เพื่อดูการวิเคราะห์ข้อมูลของคุณโดยอัตโนมัติ</p>
         </div>
 
-        <!-- Skills Section -->
-        <div class="card">
-            <h2>ทักษะความสามารถ</h2>
-            <div class="skills">
-                <span class="tag">HTML5</span>
-                <span class="tag">CSS3</span>
-                <span class="tag">JavaScript</span>
-                <span class="tag">Git & GitHub</span>
-                <span class="tag">Responsive Design</span>
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="stat-details">
+                    <h3>จำนวนเอกสารทั้งหมด</h3>
+                    <p id="totalDocs">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                <div class="stat-details">
+                    <h3>ช่วงปีที่ตีพิมพ์</h3>
+                    <p id="yearRange">-</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="stat-details">
+                    <h3>ปีที่ตีพิมพ์สูงสุด</h3>
+                    <p id="peakYear">-</p>
+                </div>
             </div>
         </div>
 
-        <!-- Contact / Links Section -->
-        <div class="card">
-            <h2>ช่องทางการติดตาม / ติดต่อ</h2>
-            <div class="btn-links">
-                <a href="https://github.com" target="_blank" class="btn">GitHub Page</a>
-                <a href="mailto:your-email@example.com" class="btn" style="background-color: #0b9f89;">ส่งอีเมลหาฉัน</a>
+        <div class="upload-section" id="uploadSection">
+            <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #94a3b8; margin-bottom: 1rem;"></i>
+            <h3>อัปโหลดไฟล์ Scopus CSV ของคุณ</h3>
+            <p>ระบบจะดึงคอลัมน์ 'Year' มาสร้างกราฟให้โดยอัตโนมัติ</p>
+            <div class="upload-btn-wrapper">
+                <button class="btn"><i class="fas fa-folder-open"></i> เลือกไฟล์ CSV</button>
+                <input type="file" id="csvFileInput" accept=".csv" />
             </div>
+            <p id="fileNameDisplay"></p>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="scopusChart"></canvas>
         </div>
     </div>
 
     <footer>
-        &copy; 2026 [ชื่อของคุณ]. All Rights Reserved.
+        <p>&copy; 2024 Scopus Data Visualization. Hosted on GitHub Pages.</p>
     </footer>
 
+    <script>
+        // กำหนดตัวแปรสำหรับกราฟเพื่อใช้ในการลบและสร้างใหม่เมื่ออัปโหลดไฟล์ใหม่
+        let myChart = null;
+
+        // ข้อมูลตัวอย่าง (Default Data) เพื่อให้หน้าเว็บไม่ว่างเปล่าก่อนอัปโหลด
+        const defaultData = {
+            '2018': 12,
+            '2019': 18,
+            '2020': 25,
+            '2021': 30,
+            '2022': 45,
+            '2023': 52,
+            '2024': 38
+        };
+
+        // ฟังก์ชันสร้างกราฟ
+        function renderChart(dataObj) {
+            const ctx = document.getElementById('scopusChart').getContext('2d');
+            
+            // ดึงปีมาเรียงจากน้อยไปมาก
+            const labels = Object.keys(dataObj).sort((a, b) => parseInt(a) - parseInt(b));
+            const dataValues = labels.map(year => dataObj[year]);
+
+            // อัปเดตการ์ดสถิติ
+            const total = dataValues.reduce((sum, val) => sum + val, 0);
+            document.getElementById('totalDocs').innerText = total.toLocaleString();
+            
+            if (labels.length > 0) {
+                document.getElementById('yearRange').innerText = `${labels[0]} - ${labels[labels.length-1]}`;
+                
+                // หาปีที่มีผลงานสูงสุด
+                let maxDocs = -1;
+                let peakYr = '-';
+                for(let i=0; i<labels.length; i++){
+                    if(dataValues[i] > maxDocs) {
+                        maxDocs = dataValues[i];
+                        peakYr = labels[i];
+                    }
+                }
+                document.getElementById('peakYear').innerText = `${peakYr} (${maxDocs} เรื่อง)`;
+            }
+
+            // ถ้ามีกราฟเก่าอยู่ให้ทำลายทิ้งก่อน
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            // สร้างกราฟใหม่
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'จำนวนผลงานตีพิมพ์ (Publications)',
+                        data: dataValues,
+                        backgroundColor: 'rgba(37, 99, 235, 0.7)',
+                        borderColor: 'rgba(37, 99, 235, 1)',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        hoverBackgroundColor: 'rgba(30, 64, 175, 0.9)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 14 },
+                            padding: 12,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: { size: 12 },
+                                precision: 0 // บังคับให้เป็นจำนวนเต็ม
+                            },
+                            title: {
+                                display: true,
+                                text: 'จำนวนเอกสาร (Documents)',
+                                font: { size: 14, weight: 'bold' }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: { size: 12 }
+                            },
+                            title: {
+                                display: true,
+                                text: 'ปีที่ตีพิมพ์ (Year)',
+                                font: { size: 14, weight: 'bold' }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // แสดงผลข้อมูลตัวอย่างครั้งแรก
+        renderChart(defaultData);
+
+        // จัดการเมื่อผู้ใช้อัปโหลดไฟล์ CSV
+        document.getElementById('csvFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('fileNameDisplay').innerText = `กำลังวิเคราะห์ไฟล์: ${file.name}`;
+
+            // ใช้ PapaParse อ่านไฟล์ CSV
+            Papa.parse(file, {
+                header: true, // ให้แถวแรกเป็น Key ของ Object
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data;
+                    const yearCount = {};
+
+                    // วนลูปนับจำนวนเอกสารตามปี (อิงจากคอลัมน์ Year ของ Scopus)
+                    data.forEach(row => {
+                        // Scopus มักจะใช้ชื่อคอลัมน์ว่า 'Year'
+                        let year = row['Year'] || row['year'] || row['ปี'];
+                        
+                        if (year && !isNaN(year)) {
+                            year = year.trim();
+                            if (yearCount[year]) {
+                                yearCount[year]++;
+                            } else {
+                                yearCount[year] = 1;
+                            }
+                        }
+                    });
+
+                    // ตรวจสอบว่ามีข้อมูลหรือไม่
+                    if (Object.keys(yearCount).length === 0) {
+                        alert('ไม่พบคอลัมน์ "Year" ในไฟล์ CSV ของคุณ กรุณาตรวจสอบรูปแบบไฟล์ Scopus อีกครั้ง');
+                        return;
+                    }
+
+                    // อัปเดตกราฟด้วยข้อมูลใหม่ที่ได้จาก CSV
+                    renderChart(yearCount);
+                },
+                error: function(err) {
+                    alert('เกิดข้อผิดพลาดในการอ่านไฟล์ CSV: ' + err.message);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
