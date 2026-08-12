@@ -3,260 +3,972 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI vs CTAM Research Data Analysis Dashboard (2025)</title>
+    <title>CSV Data Analytics & Visualization Dashboard</title>
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- PapaParse for CSV Parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <!-- Chart.js for Data Visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
+        /* ==========================================================================
+           1. CSS VARIABLES & RESET
+           ========================================================================== */
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-ai: #38bdf8;
-            --accent-ctam: #f43f5e;
-            --border-color: #334155;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #475569;
+            --success-color: #4ade80;
+            --warning-color: #facc15;
+            --danger-color: #f87171;
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 2rem;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
+        /* ==========================================================================
+           2. LAYOUT & NAVIGATION
+           ========================================================================== */
+        header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
         }
 
-        .header h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: #ffffff;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-color);
         }
 
-        .header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background-color: var(--card-bg);
-            padding: 1.2rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            text-align: center;
-        }
-
-        .stat-card h3 {
-            margin: 0;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .stat-card .number {
+        .brand i {
             font-size: 1.8rem;
-            font-weight: bold;
-            margin-top: 0.5rem;
         }
 
-        .ai-text { color: var(--accent-ai); }
-        .ctam-text { color: var(--accent-ctam); }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
 
+        /* ==========================================================================
+           3. FILE UPLOAD & HERO SECTION
+           ========================================================================== */
+        .upload-section {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            border: 2px dashed var(--accent-color);
+            border-radius: var(--radius-lg);
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-section:hover, .upload-section.dragover {
+            border-color: var(--success-color);
+            background: var(--bg-card);
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            font-size: 3.5rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .upload-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+            color: #fff;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* ==========================================================================
+           4. KPI & METRICS CARDS
+           ========================================================================== */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            display: none; /* Hidden until file loaded */
+        }
+
+        .metric-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            box-shadow: var(--shadow);
+        }
+
+        .metric-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--radius-sm);
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .metric-info h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .metric-info p {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* ==========================================================================
+           5. DASHBOARD GRID (CHARTS & CONTROLS)
+           ========================================================================== */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: 300px 1fr;
             gap: 1.5rem;
+            display: none; /* Hidden until file loaded */
         }
 
-        .chart-card {
-            background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 12px;
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .control-panel {
+            background-color: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            height: fit-content;
         }
 
-        .chart-card.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .chart-card h2 {
+        .panel-title {
             font-size: 1.1rem;
-            margin-top: 0;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 0.5rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .canvas-container {
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.65rem 0.85rem;
+            border-radius: var(--radius-sm);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-color);
+        }
+
+        .chart-container-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 450px;
             position: relative;
-            height: 320px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            flex: 1;
             width: 100%;
+            height: 100%;
+        }
+
+        /* ==========================================================================
+           6. DATA TABLE SECTION
+           ========================================================================== */
+        .table-section {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            display: none; /* Hidden until file loaded */
+        }
+
+        .table-header-tools {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            padding-left: 2.2rem;
+            width: 100%;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background-color: var(--bg-card);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th, td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--accent-color);
+            text-transform: capitalize;
+        }
+
+        tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-top: 0.5rem;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .page-btn {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ==========================================================================
+           7. FOOTER & UTILITIES
+           ========================================================================== */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+
+        .loader {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 1rem;
+            border-radius: var(--radius-md);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>AI vs CTAM Bibliometric Dashboard</h1>
-        <p>การวิเคราะห์เปรียบเทียบข้อมูลงานวิจัยปี 2025 จากฐานข้อมูล Scopus (N = 600)</p>
+    <!-- Header Navigation -->
+    <header>
+        <div class="brand">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>CSV Analytics Dashboard</span>
+        </div>
+        <div>
+            <button class="btn btn-secondary" onclick="exportTableToCSV()">
+                <i class="fa-solid fa-download"></i> Export Filtered CSV
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- 1. Upload & Drag-and-Drop Area -->
+        <section class="upload-section" id="dropZone">
+            <i class="fa-solid fa-file-csv upload-icon"></i>
+            <h2 class="upload-title">อัปโหลดไฟล์ CSV เพื่อเริ่มวิเคราะห์ข้อมูล</h2>
+            <p class="upload-subtitle">ลากไฟล์ CSV มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์จากคอมพิวเตอร์ของคุณ</p>
+            
+            <div class="btn-group">
+                <button class="btn" onclick="document.getElementById('fileInput').click()">
+                    <i class="fa-solid fa-folder-open"></i> เลือกไฟล์ CSV
+                </button>
+                <button class="btn btn-secondary" onclick="loadSampleData()">
+                    <i class="fa-solid fa-vial"></i> โหลดข้อมูลตัวอย่าง
+                </button>
+            </div>
+            <input type="file" id="fileInput" accept=".csv">
+        </section>
+
+        <!-- 2. KPI Metrics Cards -->
+        <section class="metrics-grid" id="metricsGrid">
+            <div class="metric-card">
+                <div class="metric-icon"><i class="fa-solid fa-list-ol"></i></div>
+                <div class="metric-info">
+                    <h3>จำนวนแถวทั้งหมด</h3>
+                    <p id="metricRows">0</p>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon"><i class="fa-solid fa-columns"></i></div>
+                <div class="metric-info">
+                    <h3>จำนวนคอลัมน์</h3>
+                    <p id="metricCols">0</p>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon"><i class="fa-solid fa-calculator"></i></div>
+                <div class="metric-info">
+                    <h3>คอลัมน์ตัวเลข</h3>
+                    <p id="metricNumCols">0</p>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon"><i class="fa-solid fa-font"></i></div>
+                <div class="metric-info">
+                    <h3>คอลัมน์ข้อความ</h3>
+                    <p id="metricTextCols">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Dashboard Controls & Charts -->
+        <section class="dashboard-grid" id="dashboardGrid">
+            <!-- Left Panel: Controls -->
+            <div class="control-panel">
+                <div class="panel-title">
+                    <i class="fa-solid fa-sliders"></i> ตั้งค่าการแสดงผลกราฟ
+                </div>
+                
+                <div class="form-group">
+                    <label for="chartType">ประเภทกราฟ</label>
+                    <select id="chartType" class="form-control" onchange="updateChart()">
+                        <option value="bar">Bar Chart (กราฟแท่ง)</option>
+                        <option value="line">Line Chart (กราฟเส้น)</option>
+                        <option value="pie">Pie Chart (กราฟวงกลม)</option>
+                        <option value="doughnut">Doughnut Chart (กราฟวงแหวน)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="xAxisSelect">แกน X (กลุ่ม/หมวดหมู่)</label>
+                    <select id="xAxisSelect" class="form-control" onchange="updateChart()"></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="yAxisSelect">แกน Y (ตัวเลขเป้าหมาย)</label>
+                    <select id="yAxisSelect" class="form-control" onchange="updateChart()"></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="aggregateSelect">วิธีรวมข้อมูล (Aggregation)</label>
+                    <select id="aggregateSelect" class="form-control" onchange="updateChart()">
+                        <option value="sum">ผลรวม (Sum)</option>
+                        <option value="avg">ค่าเฉลี่ย (Average)</option>
+                        <option value="count">นับจำนวน (Count)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Right Panel: Chart Visualizer -->
+            <div class="chart-container-card">
+                <div class="loader" id="chartLoader">
+                    <div class="spinner"></div>
+                    <span>กำลังประมวลผลข้อมูล...</span>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Interactive Data Table -->
+        <section class="table-section" id="tableSection">
+            <div class="table-header-tools">
+                <div class="panel-title">
+                    <i class="fa-solid fa-table"></i> ตารางแสดงข้อมูล
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="tableSearch" class="form-control" placeholder="ค้นหาในตาราง..." oninput="onSearchChange()">
+                    </div>
+                    <select id="pageSize" class="form-control" onchange="onPageSizeChange()">
+                        <option value="10">10 แถว/หน้า</option>
+                        <option value="25">25 แถว/หน้า</option>
+                        <option value="50">50 แถว/หน้า</option>
+                        <option value="100">100 แถว/หน้า</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="dataTable">
+                    <thead><tr id="tableHead"></tr></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="pagination-container">
+                <div id="tableInfo" style="color: var(--text-muted); font-size: 0.9rem;"></div>
+                <div class="pagination-controls">
+                    <button class="page-btn" id="prevBtn" onclick="changePage(-1)"><i class="fa-solid fa-chevron-left"></i> ย้อนกลับ</button>
+                    <span id="pageIndicator" style="font-size: 0.9rem; margin: 0 0.5rem;">หน้า 1 / 1</span>
+                    <button class="page-btn" id="nextBtn" onclick="changePage(1)">ถัดไป <i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </section>
+
     </div>
 
-    <!-- Quick Metrics -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>AI Dataset Total Papers</h3>
-            <div class="number ai-text">300</div>
-        </div>
-        <div class="stat-card">
-            <h3>CTAM Dataset Total Papers</h3>
-            <div class="number ctam-text">300</div>
-        </div>
-        <div class="stat-card">
-            <h3>AI Open Access Rate</h3>
-            <div class="number ai-text">70.7%</div>
-        </div>
-        <div class="stat-card">
-            <h3>CTAM Open Access Rate</h3>
-            <div class="number ctam-text">42.7%</div>
-        </div>
-    </div>
+    <!-- Footer -->
+    <footer>
+        <p>Single-Page CSV Data Analytics Dashboard &copy; 2026 - Powered by HTML5, JavaScript & Chart.js</p>
+    </footer>
 
-    <div class="dashboard-grid">
-        
-        <!-- Visualization 1: Top Keywords -->
-        <div class="chart-card full-width">
-            <h2>Visualization 1: Top Keywords Frequency Analysis</h2>
-            <div class="canvas-container">
-                <canvas id="keywordsChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Visualization 2: Access & Type Breakdown -->
-        <div class="chart-card">
-            <h2>Visualization 2: Access Model & Publication Type</h2>
-            <div class="canvas-container">
-                <canvas id="accessTypeChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Visualization 3: Citation Impact Metrics -->
-        <div class="chart-card">
-            <h2>Visualization 3: Citation Impact & Activity Metrics</h2>
-            <div class="canvas-container">
-                <canvas id="citationChart"></canvas>
-            </div>
-        </div>
-
-    </div>
-
+    <!-- ==========================================================================
+       JAVASCRIPT LOGIC & DATA PROCESSING
+       ========================================================================== -->
     <script>
-        // Chart Config Defaults
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.font.family = 'Segoe UI';
+        // Global Application State
+        let rawData = [];
+        let filteredData = [];
+        let headers = [];
+        let numericColumns = [];
+        let categoricalColumns = [];
+        let chartInstance = null;
 
-        // 1. Top Keywords Chart
-        new Chart(document.getElementById('keywordsChart'), {
-            type: 'bar',
-            data: {
-                labels: [
-                    'Artificial Intelligence', 'Bifurcation & Chaos', 'Machine Learning', 
-                    'Generative AI / ChatGPT', 'Deep Learning', 'Explainable AI (XAI)', 
-                    'Computational Thinking', 'STEM / Math Education'
-                ],
-                datasets: [{
-                    label: 'AI Dataset',
-                    data: [120, 0, 21, 20, 18, 16, 0, 0],
-                    backgroundColor: '#38bdf8'
-                }, {
-                    label: 'CTAM Dataset',
-                    data: [0, 18, 3, 0, 4, 0, 7, 8],
-                    backgroundColor: '#f43f5e'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top' }
-                },
-                scales: {
-                    x: { grid: { color: '#334155' } },
-                    y: { grid: { color: '#334155' }, beginAtZero: true }
-                }
-            }
+        // Pagination State
+        let currentPage = 1;
+        let pageSize = 10;
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            setupDragAndDrop();
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
         });
 
-        // 2. Access Model & Document Type Chart
-        new Chart(document.getElementById('accessTypeChart'), {
-            type: 'bar',
-            data: {
-                labels: ['AI: Open Access', 'AI: Closed', 'CTAM: Open Access', 'CTAM: Closed'],
-                datasets: [{
-                    label: 'Journal Article',
-                    data: [184, 77, 90, 121],
-                    backgroundColor: '#0284c7'
-                }, {
-                    label: 'Conference Paper',
-                    data: [28, 11, 38, 51],
-                    backgroundColor: '#fb7185'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { stacked: true, grid: { color: '#334155' } },
-                    y: { stacked: true, grid: { color: '#334155' }, beginAtZero: true }
-                }
-            }
-        });
+        // Setup Drag & Drop Handlers
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('dropZone');
 
-        // 3. Citation Metrics Chart
-        new Chart(document.getElementById('citationChart'), {
-            type: 'bar',
-            data: {
-                labels: ['Mean Citations', '% Papers Cited', 'Max Citations / 10'],
-                datasets: [{
-                    label: 'AI Dataset',
-                    data: [1.05, 38.0, 2.3],
-                    backgroundColor: '#38bdf8'
-                }, {
-                    label: 'CTAM Dataset',
-                    data: [2.13, 57.3, 3.4],
-                    backgroundColor: '#f43f5e'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                if (context.dataIndex === 2) {
-                                    return context.dataset.label + ': Max ' + (context.raw * 10) + ' citations';
-                                }
-                                return context.dataset.label + ': ' + context.raw + (context.dataIndex === 1 ? '%' : '');
-                            }
-                        }
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0 && files[0].name.endsWith('.csv')) {
+                    parseCSVFile(files[0]);
+                } else {
+                    alert('กรุณาอัปโหลดไฟล์นามสกุล .csv เท่านั้น');
+                }
+            });
+        }
+
+        // Handle File Select via Button
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                parseCSVFile(file);
+            }
+        }
+
+        // Load Built-in Sample CSV Data
+        function loadSampleData() {
+            const sampleCSV = `Product,Category,Region,Sales,Quantity,Profit
+Laptop,Electronics,North,45000,5,9000
+Smartphone,Electronics,South,28000,8,7000
+Tablet,Electronics,East,15000,4,3000
+Desk Chair,Furniture,North,12000,12,2400
+Office Table,Furniture,West,22000,3,4400
+Monitor,Electronics,West,18000,6,3600
+Headphones,Electronics,South,8500,15,2550
+Bookshelf,Furniture,East,9500,4,1900
+Smartwatch,Electronics,North,14000,7,2800
+Sofa,Furniture,South,35000,2,7000`;
+
+            Papa.parse(sampleCSV, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    processParsedData(results.data, results.meta.fields);
+                }
+            });
+        }
+
+        // Parse Uploaded CSV File using PapaParse
+        function parseCSVFile(file) {
+            Papa.parse(file, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results.data && results.data.length > 0) {
+                        processParsedData(results.data, results.meta.fields);
+                    } else {
+                        alert('ไม่พบข้อมูลในไฟล์ CSV ดังกล่าว');
                     }
                 },
-                scales: {
-                    x: { grid: { color: '#334155' } },
-                    y: { grid: { color: '#334155' }, beginAtZero: true }
+                error: function(err) {
+                    alert('เกิดข้อผิดพลาดในการอ่านไฟล์: ' + err.message);
                 }
+            });
+        }
+
+        // Process Parsed CSV Data
+        function processParsedData(data, fields) {
+            rawData = data;
+            filteredData = [...rawData];
+            headers = fields;
+
+            // Classify Columns (Numeric vs Categorical)
+            numericColumns = [];
+            categoricalColumns = [];
+
+            if (data.length > 0) {
+                headers.forEach(col => {
+                    const sampleValue = data[0][col];
+                    if (typeof sampleValue === 'number') {
+                        numericColumns.push(col);
+                    } else {
+                        categoricalColumns.push(col);
+                    }
+                });
             }
-        });
+
+            // Update UI Elements
+            updateMetrics();
+            populateSelectOptions();
+            
+            // Show Dashboard Panels
+            document.getElementById('metricsGrid').style.display = 'grid';
+            document.getElementById('dashboardGrid').style.display = 'grid';
+            document.getElementById('tableSection').style.display = 'flex';
+
+            // Render Table and Chart
+            currentPage = 1;
+            renderTable();
+            updateChart();
+        }
+
+        // Update KPI Cards
+        function updateMetrics() {
+            document.getElementById('metricRows').textContent = rawData.length.toLocaleString();
+            document.getElementById('metricCols').textContent = headers.length.toLocaleString();
+            document.getElementById('metricNumCols').textContent = numericColumns.length.toLocaleString();
+            document.getElementById('metricTextCols').textContent = categoricalColumns.length.toLocaleString();
+        }
+
+        // Populate Form Controls
+        function populateSelectOptions() {
+            const xAxisSelect = document.getElementById('xAxisSelect');
+            const yAxisSelect = document.getElementById('yAxisSelect');
+
+            xAxisSelect.innerHTML = '';
+            yAxisSelect.innerHTML = '';
+
+            // Populate X-Axis (Prefer Categorical, fallback to All)
+            const xOptions = categoricalColumns.length > 0 ? categoricalColumns : headers;
+            xOptions.forEach(col => {
+                const opt = document.createElement('option');
+                opt.value = col;
+                opt.textContent = col;
+                xAxisSelect.appendChild(opt);
+            });
+
+            // Populate Y-Axis (Prefer Numeric, fallback to All)
+            const yOptions = numericColumns.length > 0 ? numericColumns : headers;
+            yOptions.forEach(col => {
+                const opt = document.createElement('option');
+                opt.value = col;
+                opt.textContent = col;
+                yAxisSelect.appendChild(opt);
+            });
+        }
+
+        // Aggregate and Generate Chart
+        function updateChart() {
+            if (!rawData || rawData.length === 0) return;
+
+            const chartType = document.getElementById('chartType').value;
+            const xAxis = document.getElementById('xAxisSelect').value;
+            const yAxis = document.getElementById('yAxisSelect').value;
+            const aggregate = document.getElementById('aggregateSelect').value;
+
+            if (!xAxis || !yAxis) return;
+
+            // Show Loader
+            document.getElementById('chartLoader').style.display = 'flex';
+
+            setTimeout(() => {
+                // Grouping & Aggregation Logic
+                const grouped = {};
+
+                filteredData.forEach(row => {
+                    const groupKey = row[xAxis] !== null && row[xAxis] !== undefined ? String(row[xAxis]) : 'Unspecified';
+                    const val = Number(row[yAxis]) || 0;
+
+                    if (!grouped[groupKey]) {
+                        grouped[groupKey] = { sum: 0, count: 0 };
+                    }
+                    grouped[groupKey].sum += val;
+                    grouped[groupKey].count += 1;
+                });
+
+                const labels = Object.keys(grouped);
+                const chartData = labels.map(key => {
+                    if (aggregate === 'sum') return grouped[key].sum;
+                    if (aggregate === 'avg') return grouped[key].sum / grouped[key].count;
+                    if (aggregate === 'count') return grouped[key].count;
+                });
+
+                // Render Chart using Chart.js
+                renderChartCanvas(chartType, labels, chartData, `${aggregate.toUpperCase()} of ${yAxis} by ${xAxis}`);
+                
+                // Hide Loader
+                document.getElementById('chartLoader').style.display = 'none';
+            }, 100);
+        }
+
+        // Render Chart.js Canvas
+        function renderChartCanvas(type, labels, data, datasetLabel) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const colors = [
+                '#38bdf8', '#818cf8', '#c084fc', '#f472b6', 
+                '#fb7185', '#34d399', '#fbbf24', '#a3e635'
+            ];
+
+            chartInstance = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: datasetLabel,
+                        data: data,
+                        backgroundColor: type === 'pie' || type === 'doughnut' ? colors : 'rgba(56, 189, 248, 0.6)',
+                        borderColor: type === 'pie' || type === 'doughnut' ? '#1e293b' : '#38bdf8',
+                        borderWidth: 1.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#f8fafc' },
+                            display: type === 'pie' || type === 'doughnut'
+                        }
+                    },
+                    scales: (type === 'bar' || type === 'line') ? {
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: '#334155' }
+                        },
+                        y: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: '#334155' }
+                        }
+                    } : {}
+                }
+            });
+        }
+
+        // Render Table with Pagination
+        function renderTable() {
+            const thead = document.getElementById('tableHead');
+            const tbody = document.getElementById('tableBody');
+
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            // Table Headers
+            headers.forEach(h => {
+                const th = document.createElement('th');
+                th.textContent = h;
+                thead.appendChild(th);
+            });
+
+            // Calculate Pagination
+            const startIdx = (currentPage - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, filteredData.length);
+            const pageData = filteredData.slice(startIdx, endIdx);
+
+            // Table Rows
+            pageData.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(h => {
+                    const td = document.createElement('td');
+                    td.textContent = row[h] !== null && row[h] !== undefined ? row[h] : '';
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            // Update Pagination UI Controls
+            const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
+            document.getElementById('pageIndicator').textContent = `หน้า ${currentPage} / ${totalPages}`;
+            document.getElementById('tableInfo').textContent = `แสดงรายการที่ ${filteredData.length > 0 ? startIdx + 1 : 0} ถึง ${endIdx} จากทั้งหมด ${filteredData.length.toLocaleString()} รายการ`;
+            
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+        }
+
+        // Table Pagination Handlers
+        function changePage(direction) {
+            currentPage += direction;
+            renderTable();
+        }
+
+        function onPageSizeChange() {
+            pageSize = parseInt(document.getElementById('pageSize').value);
+            currentPage = 1;
+            renderTable();
+        }
+
+        // Search/Filter Handler
+        function onSearchChange() {
+            const query = document.getElementById('tableSearch').value.toLowerCase().trim();
+            
+            if (query === '') {
+                filteredData = [...rawData];
+            } else {
+                filteredData = rawData.filter(row => {
+                    return headers.some(h => {
+                        return String(row[h]).toLowerCase().includes(query);
+                    });
+                });
+            }
+
+            currentPage = 1;
+            renderTable();
+            updateChart(); // Dynamically update chart based on search query
+        }
+
+        // Export Filtered Table Data back to CSV
+        function exportTableToCSV() {
+            if (!filteredData || filteredData.length === 0) {
+                alert('ไม่มีข้อมูลสำหรับส่งออก');
+                return;
+            }
+
+            const csvContent = Papa.unparse(filteredData);
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `exported_data_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     </script>
 </body>
 </html>
