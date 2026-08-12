@@ -1,17 +1,756 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>ประวัติส่วนตัวนักศึกษา</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyMusic - Music Player</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #0b0b0f;
+            color: white;
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        header {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: #111116;
+            border-bottom: 1px solid #25252c;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #8b5cf6;
+        }
+
+        .search {
+            width: 350px;
+            background: #222229;
+            border: none;
+            padding: 13px 20px;
+            border-radius: 25px;
+            color: white;
+            outline: none;
+        }
+
+        .profile {
+            background: #8b5cf6;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        /* Main */
+        main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 40px 25px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #5b21b6, #111116);
+            border-radius: 25px;
+            padding: 40px;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            gap: 35px;
+            box-shadow: 0 15px 50px rgba(0,0,0,.4);
+        }
+
+        .hero img {
+            width: 210px;
+            height: 210px;
+            object-fit: cover;
+            border-radius: 18px;
+            box-shadow: 0 15px 35px rgba(0,0,0,.5);
+        }
+
+        .hero-text h1 {
+            font-size: 42px;
+            margin-bottom: 12px;
+        }
+
+        .hero-text p {
+            color: #d1d1d5;
+            margin-bottom: 25px;
+        }
+
+        .play-btn {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 13px 28px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .play-btn:hover {
+            background: #a78bfa;
+        }
+
+        /* Section */
+        .section-title {
+            margin: 45px 0 20px;
+            font-size: 25px;
+        }
+
+        /* Cards */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #15151b;
+            padding: 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: .25s;
+        }
+
+        .card:hover {
+            background: #202027;
+            transform: translateY(-5px);
+        }
+
+        .card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .card p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* Playlist */
+        .playlist {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .song {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 15px;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .song:hover {
+            background: #1b1b22;
+        }
+
+        .song.active {
+            background: #24183d;
+        }
+
+        .song img {
+            width: 55px;
+            height: 55px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .song-info {
+            flex: 1;
+        }
+
+        .song-info h3 {
+            font-size: 15px;
+        }
+
+        .song-info p {
+            color: #888;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .duration {
+            color: #888;
+        }
+
+        /* Player */
+        .player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 90px;
+            background: rgba(18,18,23,.97);
+            border-top: 1px solid #292931;
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            gap: 25px;
+            z-index: 20;
+        }
+
+        .now-playing {
+            width: 260px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .now-playing img {
+            width: 55px;
+            height: 55px;
+            border-radius: 7px;
+            object-fit: cover;
+        }
+
+        .now-playing h4 {
+            font-size: 14px;
+        }
+
+        .now-playing p {
+            color: #888;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .controls {
+            flex: 1;
+            text-align: center;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 22px;
+            margin-bottom: 8px;
+        }
+
+        .buttons button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .buttons .main-play {
+            width: 38px;
+            height: 38px;
+            background: white;
+            color: black;
+            border-radius: 50%;
+        }
+
+        .progress {
+            width: 100%;
+            max-width: 550px;
+            height: 5px;
+            background: #444;
+            border-radius: 5px;
+            margin: auto;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #8b5cf6;
+            border-radius: 5px;
+        }
+
+        .volume {
+            width: 150px;
+        }
+
+        input[type="range"] {
+            accent-color: #8b5cf6;
+            width: 100%;
+        }
+
+        /* Mobile */
+        @media (max-width: 700px) {
+
+            header {
+                padding: 0 15px;
+            }
+
+            .search {
+                width: 150px;
+            }
+
+            main {
+                padding: 25px 15px;
+            }
+
+            .hero {
+                padding: 25px;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .hero img {
+                width: 170px;
+                height: 170px;
+            }
+
+            .hero-text h1 {
+                font-size: 30px;
+            }
+
+            .now-playing {
+                width: auto;
+            }
+
+            .volume {
+                display: none;
+            }
+
+            .player {
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .now-playing p {
+                display: none;
+            }
+
+            .now-playing h4 {
+                max-width: 100px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-    <h1>ประวัติส่วนตัวนักศึกษา</h1>
+<header>
+    <div class="logo">♫ MyMusic</div>
 
-    <p>ชื่อ: สมชาย ใจดี</p>
-    <p>คณะ: คณะวิทยาศาสตร์</p>
-    <p>สาขา: วิทยาการคอมพิวเตอร์</p>
-    <p>รหัสนิสิต: 66012345678</p>
+    <input
+        type="text"
+        class="search"
+        id="search"
+        placeholder="ค้นหาเพลง..."
+        onkeyup="searchSong()"
+    >
+
+    <div class="profile">M</div>
+</header>
+
+
+<main>
+
+    <section class="hero">
+
+        <img
+            src="https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600"
+            alt="Music"
+        >
+
+        <div class="hero-text">
+            <p>MY MUSIC</p>
+            <h1>ฟังเพลงที่คุณชอบ 🎧</h1>
+            <p>
+                รวมเพลงโปรดของคุณไว้ในที่เดียว
+                เพลิดเพลินกับเสียงเพลงทุกเวลา
+            </p>
+
+            <button class="play-btn" onclick="playSong(0)">
+                ▶ เล่นเพลง
+            </button>
+        </div>
+
+    </section>
+
+
+    <h2 class="section-title">เพลงแนะนำ</h2>
+
+    <div class="cards">
+
+        <div class="card" onclick="playSong(0)">
+            <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500">
+            <h3>Summer Vibes</h3>
+            <p>MyMusic Artist</p>
+        </div>
+
+        <div class="card" onclick="playSong(1)">
+            <img src="https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=500">
+            <h3>Night Drive</h3>
+            <p>Dreamer</p>
+        </div>
+
+        <div class="card" onclick="playSong(2)">
+            <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=500">
+            <h3>Lost Stars</h3>
+            <p>Moonlight</p>
+        </div>
+
+        <div class="card" onclick="playSong(3)">
+            <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500">
+            <h3>Good Day</h3>
+            <p>Sunny</p>
+        </div>
+
+    </div>
+
+
+    <h2 class="section-title">เพลงทั้งหมด</h2>
+
+    <div class="playlist" id="playlist">
+
+        <div class="song active" onclick="playSong(0)">
+            <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200">
+
+            <div class="song-info">
+                <h3>Summer Vibes</h3>
+                <p>MyMusic Artist</p>
+            </div>
+
+            <span class="duration">♪</span>
+        </div>
+
+
+        <div class="song" onclick="playSong(1)">
+            <img src="https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=200">
+
+            <div class="song-info">
+                <h3>Night Drive</h3>
+                <p>Dreamer</p>
+            </div>
+
+            <span class="duration">♪</span>
+        </div>
+
+
+        <div class="song" onclick="playSong(2)">
+            <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=200">
+
+            <div class="song-info">
+                <h3>Lost Stars</h3>
+                <p>Moonlight</p>
+            </div>
+
+            <span class="duration">♪</span>
+        </div>
+
+
+        <div class="song" onclick="playSong(3)">
+            <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=200">
+
+            <div class="song-info">
+                <h3>Good Day</h3>
+                <p>Sunny</p>
+            </div>
+
+            <span class="duration">♪</span>
+        </div>
+
+    </div>
+
+</main>
+
+
+<!-- MUSIC PLAYER -->
+
+<div class="player">
+
+    <div class="now-playing">
+
+        <img
+            id="playerImage"
+            src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200"
+        >
+
+        <div>
+            <h4 id="playerTitle">Summer Vibes</h4>
+            <p id="playerArtist">MyMusic Artist</p>
+        </div>
+
+    </div>
+
+
+    <div class="controls">
+
+        <div class="buttons">
+
+            <button onclick="previousSong()">⏮</button>
+
+            <button
+                class="main-play"
+                id="playButton"
+                onclick="togglePlay()"
+            >
+                ▶
+            </button>
+
+            <button onclick="nextSong()">⏭</button>
+
+        </div>
+
+        <div
+            class="progress"
+            onclick="seek(event)"
+        >
+            <div
+                class="progress-bar"
+                id="progressBar"
+            ></div>
+        </div>
+
+    </div>
+
+
+    <div class="volume">
+        🔊
+        <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.7"
+            id="volume"
+        >
+    </div>
+
+</div>
+
+
+<audio id="audio"></audio>
+
+
+<script>
+
+    const songs = [
+
+        {
+            title: "Summer Vibes",
+            artist: "MyMusic Artist",
+            image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500",
+            audio: "music/song1.mp3"
+        },
+
+        {
+            title: "Night Drive",
+            artist: "Dreamer",
+            image: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=500",
+            audio: "music/song2.mp3"
+        },
+
+        {
+            title: "Lost Stars",
+            artist: "Moonlight",
+            image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=500",
+            audio: "music/song3.mp3"
+        },
+
+        {
+            title: "Good Day",
+            artist: "Sunny",
+            image: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500",
+            audio: "music/song4.mp3"
+        }
+
+    ];
+
+
+    let currentSong = 0;
+
+    const audio = document.getElementById("audio");
+    const playButton = document.getElementById("playButton");
+    const progressBar = document.getElementById("progressBar");
+    const playerTitle = document.getElementById("playerTitle");
+    const playerArtist = document.getElementById("playerArtist");
+    const playerImage = document.getElementById("playerImage");
+
+
+    function playSong(index) {
+
+        currentSong = index;
+
+        audio.src = songs[index].audio;
+
+        playerTitle.textContent = songs[index].title;
+        playerArtist.textContent = songs[index].artist;
+        playerImage.src = songs[index].image;
+
+        audio.play();
+
+        playButton.textContent = "❚❚";
+
+        updateActiveSong();
+    }
+
+
+    function togglePlay() {
+
+        if (!audio.src) {
+            playSong(0);
+            return;
+        }
+
+        if (audio.paused) {
+
+            audio.play();
+            playButton.textContent = "❚❚";
+
+        } else {
+
+            audio.pause();
+            playButton.textContent = "▶";
+
+        }
+    }
+
+
+    function nextSong() {
+
+        currentSong++;
+
+        if (currentSong >= songs.length) {
+            currentSong = 0;
+        }
+
+        playSong(currentSong);
+    }
+
+
+    function previousSong() {
+
+        currentSong--;
+
+        if (currentSong < 0) {
+            currentSong = songs.length - 1;
+        }
+
+        playSong(currentSong);
+    }
+
+
+    audio.addEventListener("timeupdate", function() {
+
+        if (audio.duration) {
+
+            const percent =
+                (audio.currentTime / audio.duration) * 100;
+
+            progressBar.style.width = percent + "%";
+        }
+
+    });
+
+
+    audio.addEventListener("ended", function() {
+        nextSong();
+    });
+
+
+    function seek(event) {
+
+        const progress =
+            event.currentTarget;
+
+        const width =
+            progress.clientWidth;
+
+        const clickX =
+            event.offsetX;
+
+        if (audio.duration) {
+
+            audio.currentTime =
+                (clickX / width) * audio.duration;
+
+        }
+    }
+
+
+    document.getElementById("volume")
+        .addEventListener("input", function() {
+
+            audio.volume = this.value;
+
+        });
+
+
+    function updateActiveSong() {
+
+        const songElements =
+            document.querySelectorAll(".song");
+
+        songElements.forEach(function(song, index) {
+
+            song.classList.remove("active");
+
+            if (index === currentSong) {
+                song.classList.add("active");
+            }
+
+        });
+
+    }
+
+
+    function searchSong() {
+
+        const keyword =
+            document.getElementById("search")
+            .value
+            .toLowerCase();
+
+        const songElements =
+            document.querySelectorAll(".song");
+
+        songElements.forEach(function(song) {
+
+            const text =
+                song.innerText.toLowerCase();
+
+            if (text.includes(keyword)) {
+                song.style.display = "flex";
+            } else {
+                song.style.display = "none";
+            }
+
+        });
+
+    }
+
+</script>
 
 </body>
 </html>
